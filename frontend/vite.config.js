@@ -9,7 +9,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: "https://skillbridge-ai-1uy8.onrender.com/api/auth/login";
+        target: 'https://skillbridge-ai-1uy8.onrender.com',
         changeOrigin: true
       }
     }
