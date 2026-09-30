@@ -1,0 +1,55 @@
+
+name: SkillBridge AI CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Backend CI
+      - name: Setup Python
+        run: |
+          python3 -m venv backend/venv
+          source backend/venv/bin/activate
+          pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Backend Tests
+        run: |
+          source backend/venv/bin/activate
+          pytest backend/tests
+
+      # Frontend CI
+      - name: Install Node Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm run build
+
+      # Deploy Frontend
+      - name: Deploy Frontend
+        run: |
+          sudo rm -rf /var/www/skillbridge-ai/*
+          sudo cp -r frontend/dist/* /var/www/skillbridge-ai/
+
+      # Restart Nginx
+      - name: Restart Nginx
+        run: |
+          sudo systemctl restart nginx
+
+      - name: Deployment Complete
+        run: |
+          echo "SkillBridge AI deployed successfully!"
+
