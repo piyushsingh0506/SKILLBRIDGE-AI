@@ -11,12 +11,16 @@ jobs:
     runs-on: self-hosted
 
     steps:
+
+      # ==============================
+      # 1. CHECKOUT CODE
+      # ==============================
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # =========================
-      # BACKEND
-      # =========================
+      # ==============================
+      # 2. BACKEND SETUP
+      # ==============================
       - name: Setup Backend
         run: |
           python3 -m venv backend/venv
@@ -24,40 +28,68 @@ jobs:
           backend/venv/bin/python -m pip install -r backend/requirements.txt
           backend/venv/bin/python -m pip install pytest
 
+      # ==============================
+      # 3. BACKEND TEST
+      # ==============================
       - name: Run Backend Tests
         run: |
           backend/venv/bin/python -m pytest backend/tests
 
-      # =========================
-      # FRONTEND
-      # =========================
+      # ==============================
+      # 4. FRONTEND DEPENDENCIES
+      # ==============================
       - name: Install Frontend Dependencies
         run: |
           cd frontend
           npm ci
 
+      # ==============================
+      # 5. FRONTEND BUILD
+      # ==============================
       - name: Build Frontend
         run: |
           cd frontend
           npm run build
 
-      # =========================
-      # DEPLOY FRONTEND
-      # =========================
+      # ==============================
+      # 6. DEPLOY FRONTEND
+      # ==============================
       - name: Deploy Frontend
         run: |
           sudo rm -rf /var/www/skillbridge-ai/*
           sudo cp -r frontend/dist/* /var/www/skillbridge-ai/
 
-      # =========================
-      # NGINX
-      # =========================
+      # ==============================
+      # 7. DEPLOY BACKEND
+      # ==============================
+      - name: Deploy Backend
+        run: |
+          sudo systemctl restart skillbridge
+          sleep 3
+          sudo systemctl is-active skillbridge
+
+      # ==============================
+      # 8. RESTART NGINX
+      # ==============================
       - name: Restart Nginx
         run: |
+          sudo nginx -t
           sudo systemctl restart nginx
+          sudo systemctl is-active nginx
 
-      - name: Deployment Complete
+      # ==============================
+      # 9. HEALTH CHECK
+      # ==============================
+      - name: Backend Health Check
         run: |
-          echo "================================="
-          echo "SkillBridge AI deployed successfully"
-          echo "================================="
+          curl -f http://127.0.0.1:8000/ || exit 1
+
+      # ==============================
+      # 10. DEPLOYMENT SUCCESS
+      # ==============================
+      - name: Deployment Successful
+        run: |
+          echo "======================================"
+          echo " SkillBridge AI Deployment Successful "
+          echo "======================================"
+
