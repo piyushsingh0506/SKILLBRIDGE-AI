@@ -2,6 +2,8 @@ from typing import List, Dict, Any
 from app.ai.skill_extractor import normalize_skill
 from app.ai.skill_gap import ROLE_BENCHMARKS
 
+
+
 def predict_career_paths(student_skills: List[Dict[str, Any]], interests: str = "") -> List[Dict[str, Any]]:
     """
     Ranks top career paths based on skill overlap, proficiency, and student interests.
