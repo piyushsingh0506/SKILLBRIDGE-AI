@@ -1,4 +1,4 @@
-
+```yaml
 name: SkillBridge AI CI/CD
 
 on:
@@ -14,21 +14,24 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Backend CI
-      - name: Setup Python
+      # =========================
+      # BACKEND
+      # =========================
+      - name: Setup Backend
         run: |
           python3 -m venv backend/venv
-          source backend/venv/bin/activate
-          pip install --upgrade pip
-          pip install -r backend/requirements.txt
+          backend/venv/bin/python -m pip install --upgrade pip
+          backend/venv/bin/python -m pip install -r backend/requirements.txt
+          backend/venv/bin/python -m pip install pytest
 
       - name: Run Backend Tests
         run: |
-          source backend/venv/bin/activate
-          pytest backend/tests
+          backend/venv/bin/python -m pytest backend/tests
 
-      # Frontend CI
-      - name: Install Node Dependencies
+      # =========================
+      # FRONTEND
+      # =========================
+      - name: Install Frontend Dependencies
         run: |
           cd frontend
           npm ci
@@ -38,18 +41,24 @@ jobs:
           cd frontend
           npm run build
 
-      # Deploy Frontend
+      # =========================
+      # DEPLOY FRONTEND
+      # =========================
       - name: Deploy Frontend
         run: |
           sudo rm -rf /var/www/skillbridge-ai/*
           sudo cp -r frontend/dist/* /var/www/skillbridge-ai/
 
-      # Restart Nginx
+      # =========================
+      # NGINX
+      # =========================
       - name: Restart Nginx
         run: |
           sudo systemctl restart nginx
 
       - name: Deployment Complete
         run: |
-          echo "SkillBridge AI deployed successfully!"
-
+          echo "================================="
+          echo "SkillBridge AI deployed successfully"
+          echo "================================="
+```
